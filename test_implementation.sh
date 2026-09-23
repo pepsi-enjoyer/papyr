@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Test script for lyte DOCX parser
+# Test script for papyr DOCX parser
 # This script demonstrates the document model and parser implementation
 
-echo "🧪 Testing Lyte Document Model and Parser"
+echo "🧪 Testing Papyr Document Model and Parser"
 echo "============================================="
 
 # Test compilation

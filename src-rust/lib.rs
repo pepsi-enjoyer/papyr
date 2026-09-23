@@ -1,4 +1,4 @@
-//! Lyte DOCX Parser Library
+//! Papyr DOCX Parser Library
 //! 
 //! A lightweight, read-only DOCX parser focused on extracting structured content
 //! for rendering in a Tauri-based document viewer.

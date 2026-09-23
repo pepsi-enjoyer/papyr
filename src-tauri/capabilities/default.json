@@ -1,6 +1,6 @@
 {
   "identifier": "default",
-  "description": "Default capabilities for Lyte",
+  "description": "Default capabilities for Papyr",
   "windows": ["main"],
   "permissions": [
     "core:default",

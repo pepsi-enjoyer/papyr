@@ -16,11 +16,13 @@ const recentFilesList = document.getElementById('recent-files-list');
 const statusBanner = document.getElementById('status-banner');
 const fileInfo = document.getElementById('file-info');
 const themeIcon = document.getElementById('theme-icon');
+const openInWordButton = document.getElementById('open-in-word-btn');
+const commentsButton = document.getElementById('toggle-comments-btn');
 const findBar = document.getElementById('find-bar');
 const findInput = document.getElementById('find-input');
 const findCount = document.getElementById('find-count');
 
-const DOC_ZOOM_STORAGE_KEY = 'lyte-doc-zoom';
+const DOC_ZOOM_STORAGE_KEY = 'papyr-doc-zoom';
 const DOC_ZOOM_DEFAULT = 1;
 const DOC_ZOOM_MIN = 0.5;
 const DOC_ZOOM_MAX = 2;
@@ -64,8 +66,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setupEventListeners() {
     document.getElementById('open-file-btn').addEventListener('click', handleOpenFile);
     document.getElementById('welcome-open-btn').addEventListener('click', handleOpenFile);
+    openInWordButton.addEventListener('click', handleOpenInMicrosoftWord);
     document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
-    document.getElementById('toggle-comments-btn').addEventListener('click', toggleComments);
+    commentsButton.addEventListener('click', toggleComments);
     document.getElementById('close-comments-btn').addEventListener('click', toggleComments);
     document.getElementById('find-close-btn').addEventListener('click', closeFindBar);
     document.getElementById('find-next-btn').addEventListener('click', () => navigateFind(1));
@@ -159,6 +162,7 @@ async function loadDocument(path) {
     }
 
     currentFilePath = path;
+    setWordButtonAvailability(false);
     fileInfo.textContent = 'Loading...';
     showStatus('Loading document...', 'loading', 1500);
 
@@ -166,11 +170,34 @@ async function loadDocument(path) {
         const openedFile = await invoke('open_file', { path });
         fileInfo.textContent = '';
         renderOpenedFile(openedFile);
+        setWordButtonAvailability(openedFile?.type === 'docx');
         void loadRecentFiles();
         showStatus(getFileName(path) + ' opened', 'success', 1800);
     } catch (err) {
+        setWordButtonAvailability(false);
         showError(err);
     }
+}
+
+async function handleOpenInMicrosoftWord() {
+    if (!invoke || !currentFilePath || !currentDocument) return;
+
+    setWordButtonAvailability(false);
+    openInWordButton.setAttribute('aria-busy', 'true');
+
+    try {
+        await invoke('open_in_microsoft_word', { path: currentFilePath });
+        showStatus(`${getFileName(currentFilePath)} opened in Microsoft Word`, 'success', 1800);
+    } catch (err) {
+        showError(err);
+    } finally {
+        openInWordButton.removeAttribute('aria-busy');
+        setWordButtonAvailability(Boolean(currentDocument));
+    }
+}
+
+function setWordButtonAvailability(isAvailable) {
+    openInWordButton.disabled = !isAvailable;
 }
 
 function showError(msg) {
@@ -367,7 +394,7 @@ function renderOpenedFile(openedFile) {
         return;
     }
 
-    showError('Unsupported file response from Lyte.');
+    showError('Unsupported file response from Papyr.');
 }
 
 function renderWorkbook(workbook) {
@@ -387,8 +414,8 @@ function renderWorkbook(workbook) {
             cache.set(workbook.active_sheet_index, workbook.active_sheet);
         }
     }
-    commentsVisible = false;
-    commentsPanel.style.display = 'none';
+    setCommentsAvailability(false);
+    setCommentsVisibility(false);
     renderComments([]);
     closeFindBar();
 
@@ -402,8 +429,8 @@ function renderWorkbook(workbook) {
 
     deskContent.appendChild(container);
 
-    const filename = getFileName(currentFilePath) || 'Lyte';
-    document.title = filename + ' - Lyte';
+    const filename = getFileName(currentFilePath) || 'Papyr';
+    document.title = filename + ' - Papyr';
 }
 
 function renderWorkbookHeader(workbook, sheet) {
@@ -801,7 +828,7 @@ function renderEmptySheetState() {
     empty.className = 'spreadsheet-empty';
     empty.innerHTML = `
         <h2>This sheet is empty</h2>
-        <p>Lyte opened the workbook, but this sheet has no visible preview cells.</p>
+        <p>Papyr opened the workbook, but this sheet has no visible preview cells.</p>
     `;
     return empty;
 }
@@ -817,8 +844,8 @@ function renderDocument(doc) {
     deskContent.classList.remove('spreadsheet-content');
     desk.classList.remove('desk--spreadsheet');
     setDocumentZoomWheel(true);
-    commentsVisible = false;
-    commentsPanel.style.display = 'none';
+    setCommentsAvailability(true);
+    setCommentsVisibility(false);
     closeFindBar();
 
     // Cache resolved default style once for entire render pass
@@ -840,12 +867,11 @@ function renderDocument(doc) {
     renderComments(doc.comments);
 
     if (doc.comments && doc.comments.length > 0) {
-        commentsVisible = true;
-        commentsPanel.style.display = 'flex';
+        setCommentsVisibility(true);
     }
 
-    const filename = getFileName(currentFilePath) || 'Lyte';
-    document.title = filename + ' - Lyte';
+    const filename = getFileName(currentFilePath) || 'Papyr';
+    document.title = filename + ' - Papyr';
 
     if (findInput.value.trim()) {
         scheduleFind();
@@ -914,7 +940,7 @@ function renderEmptyDocumentPage() {
     content.innerHTML = `
         <div class="doc-empty-state">
             <h2>This document is empty</h2>
-            <p>Lyte opened the file, but there is no visible body content to render yet.</p>
+            <p>Papyr opened the file, but there is no visible body content to render yet.</p>
         </div>
     `;
     page.appendChild(content);
@@ -1253,8 +1279,19 @@ function renderComments(comments) {
 }
 
 function toggleComments() {
-    commentsVisible = !commentsVisible;
+    if (commentsButton.disabled) return;
+    setCommentsVisibility(!commentsVisible);
+}
+
+function setCommentsAvailability(isAvailable) {
+    commentsButton.disabled = !isAvailable;
+}
+
+function setCommentsVisibility(isVisible) {
+    commentsVisible = Boolean(isVisible);
     commentsPanel.style.display = commentsVisible ? 'flex' : 'none';
+    commentsButton.classList.toggle('is-active', commentsVisible);
+    commentsButton.setAttribute('aria-pressed', String(commentsVisible));
 }
 
 function scrollToComment(commentId) {
@@ -1405,9 +1442,9 @@ function clearFindHighlights() {
 // --- Theme ---
 
 async function initializeTheme() {
-    const localTheme = normalizeTheme(localStorage.getItem('lyte-theme')) || 'light';
+    const localTheme = normalizeTheme(localStorage.getItem('papyr-theme')) || 'light';
     applyTheme(localTheme);
-    localStorage.setItem('lyte-theme', localTheme);
+    localStorage.setItem('papyr-theme', localTheme);
 
     if (!invoke) return;
 
@@ -1416,7 +1453,7 @@ async function initializeTheme() {
         if (!savedTheme) return;
 
         applyTheme(savedTheme);
-        localStorage.setItem('lyte-theme', savedTheme);
+        localStorage.setItem('papyr-theme', savedTheme);
     } catch (err) {
         console.log('Could not load theme preference:', err);
     }
@@ -1427,7 +1464,7 @@ function hasTauriApi() {
 }
 
 function reportMissingTauriApi() {
-    const message = 'Lyte failed to load its Tauri desktop APIs. Rebuild the app after enabling withGlobalTauri in tauri.conf.json.';
+    const message = 'Papyr failed to load its Tauri desktop APIs. Rebuild the app after enabling withGlobalTauri in tauri.conf.json.';
     if (fileInfo) {
         fileInfo.textContent = message;
         fileInfo.style.color = '#e74c3c';
@@ -1443,7 +1480,7 @@ function toggleTheme() {
 async function setTheme(theme) {
     const normalizedTheme = normalizeTheme(theme) || 'light';
     applyTheme(normalizedTheme);
-    localStorage.setItem('lyte-theme', normalizedTheme);
+    localStorage.setItem('papyr-theme', normalizedTheme);
 
     if (!invoke) return;
 
@@ -1474,22 +1511,19 @@ function getThemeIconSvg(theme) {
     if (theme === 'dark') {
         return `
             <svg viewBox="0 0 24 24">
-                <path d="M14.5 3.5a7.5 7.5 0 1 0 6 11.9 8.5 8.5 0 1 1-6-11.9Z"></path>
+                <path class="icon-fill" d="M14.75 3.25a8.25 8.25 0 1 0 5.9 12.75 9 9 0 0 1-5.9-12.75Z"></path>
+                <path d="M14.75 3.25a8.25 8.25 0 1 0 5.9 12.75 9 9 0 0 1-5.9-12.75Z"></path>
+                <path d="m18.6 4 .38 1.02L20 5.4l-1.02.38-.38 1.02-.38-1.02-1.02-.38 1.02-.38L18.6 4Z"></path>
             </svg>
         `;
     }
 
     return `
         <svg viewBox="0 0 24 24">
+            <circle class="icon-fill" cx="12" cy="12" r="4.25"></circle>
             <circle cx="12" cy="12" r="4.25"></circle>
-            <path d="M12 2.75v2.5"></path>
-            <path d="M12 18.75v2.5"></path>
-            <path d="M21.25 12h-2.5"></path>
-            <path d="M5.25 12h-2.5"></path>
-            <path d="M18.54 5.46l-1.77 1.77"></path>
-            <path d="M7.23 16.77l-1.77 1.77"></path>
-            <path d="M18.54 18.54l-1.77-1.77"></path>
-            <path d="M7.23 7.23 5.46 5.46"></path>
+            <path d="M12 2.5v2.25M12 19.25v2.25M21.5 12h-2.25M4.75 12H2.5"></path>
+            <path d="m18.72 5.28-1.6 1.6M6.88 17.12l-1.6 1.6M18.72 18.72l-1.6-1.6M6.88 6.88l-1.6-1.6"></path>
         </svg>
     `;
 }

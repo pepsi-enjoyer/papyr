@@ -1,12 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use lyte_app::csv_parser;
-use lyte_app::excel_parser;
-use lyte_app::model::Document;
-use lyte_app::parser::DocxParser;
-use lyte_app::xlsx_model::{XlsxSheet, XlsxWorkbook};
-use lyte_app::xlsx_parser::XlsxParser;
+use papyr_app::csv_parser;
+use papyr_app::excel_parser;
+use papyr_app::model::Document;
+use papyr_app::parser::DocxParser;
+use papyr_app::xlsx_model::{XlsxSheet, XlsxWorkbook};
+use papyr_app::xlsx_parser::XlsxParser;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -62,7 +62,7 @@ fn open_docx(path: String, app: tauri::AppHandle) -> Result<Document, String> {
 #[tauri::command]
 fn open_file(path: String, app: tauri::AppHandle) -> Result<OpenedFile, String> {
     let file_kind = file_kind_from_path(Path::new(&path)).ok_or_else(|| {
-        "Unsupported file type. Lyte can open .docx, .xlsx, .xlsm, .xlsb, .xls, and .csv files."
+        "Unsupported file type. Papyr can open .docx, .xlsx, .xlsm, .xlsb, .xls, and .csv files."
             .to_string()
     })?;
 
@@ -86,6 +86,73 @@ fn open_xlsx_sheet(path: String, sheet_index: usize) -> Result<XlsxSheet, String
     };
 
     parse_spreadsheet_sheet(&path, kind, sheet_index)
+}
+
+#[tauri::command]
+fn open_in_microsoft_word(path: String) -> Result<(), String> {
+    let document_path = PathBuf::from(path);
+
+    if !is_docx_path(&document_path) {
+        return Err("Only DOCX files can be opened in Microsoft Word.".to_string());
+    }
+
+    if !document_path.is_file() {
+        return Err("The document no longer exists at its original location.".to_string());
+    }
+
+    launch_microsoft_word(&document_path)
+}
+
+fn is_docx_path(path: &Path) -> bool {
+    path.extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("docx"))
+}
+
+#[cfg(target_os = "windows")]
+fn launch_microsoft_word(path: &Path) -> Result<(), String> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows::core::{w, PCWSTR};
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::Shell::ShellExecuteW;
+    use windows::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+    let mut arguments = Vec::with_capacity(path.as_os_str().len() + 3);
+    arguments.push('"' as u16);
+    arguments.extend(path.as_os_str().encode_wide());
+    arguments.push('"' as u16);
+    arguments.push(0);
+
+    let result = unsafe {
+        ShellExecuteW(
+            HWND::default(),
+            w!("open"),
+            w!("winword.exe"),
+            PCWSTR(arguments.as_ptr()),
+            PCWSTR::null(),
+            SW_SHOWNORMAL,
+        )
+    };
+    let result_code = result.0 as isize;
+
+    if result_code > 32 {
+        Ok(())
+    } else if result_code == 2 {
+        Err(
+            "Microsoft Word could not be found. Make sure it is installed and try again."
+                .to_string(),
+        )
+    } else {
+        Err(format!(
+            "Microsoft Word could not be opened (Windows error code {}).",
+            result_code
+        ))
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn launch_microsoft_word(_path: &Path) -> Result<(), String> {
+    Err("Opening documents in Microsoft Word is currently supported on Windows only.".to_string())
 }
 
 fn parse_docx_document(path: &str) -> Result<Document, String> {
@@ -389,6 +456,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             open_docx,
             open_file,
+            open_in_microsoft_word,
             open_xlsx_sheet,
             get_recent_files,
             get_launch_file_path,

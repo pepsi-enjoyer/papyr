@@ -272,7 +272,7 @@ mod tests {
 
     #[test]
     fn parses_basic_comma_csv() {
-        let path = write_temp("lyte_basic.csv", b"name,age\nAlice,30\nBob,25\n");
+        let path = write_temp("papyr_basic.csv", b"name,age\nAlice,30\nBob,25\n");
         let workbook = parse_workbook(&path).unwrap();
         let sheet = workbook.active_sheet.unwrap();
 
@@ -293,7 +293,7 @@ mod tests {
     #[test]
     fn detects_semicolon_and_strips_bom() {
         let path = write_temp(
-            "lyte_semicolon.csv",
+            "papyr_semicolon.csv",
             "\u{feff}a;b;c\n1;2;3\n".as_bytes(),
         );
         let sheet = parse_sheet(&path, 0).unwrap();
@@ -303,7 +303,7 @@ mod tests {
 
     #[test]
     fn handles_quoted_fields_with_delimiters() {
-        let path = write_temp("lyte_quoted.csv", b"\"a,b\",c\n");
+        let path = write_temp("papyr_quoted.csv", b"\"a,b\",c\n");
         let sheet = parse_sheet(&path, 0).unwrap();
         assert_eq!(sheet.rows[0].cells.len(), 2);
         assert_eq!(sheet.rows[0].cells[0].value, "a,b");

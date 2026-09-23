@@ -54,32 +54,60 @@ body {
 }
 
 .tool-rail-btn {
+    --tool-accent: 71, 85, 105;
     width: 48px;
     height: 48px;
     min-height: 48px;
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
+    background: rgba(var(--tool-accent), 0.055);
+    color: rgb(var(--tool-accent));
+    border: 1px solid rgba(var(--tool-accent), 0.16);
     padding: 0;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: color 0.18s, background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
 }
 
-.tool-rail-btn:hover {
-    color: var(--text);
-    background: rgba(15, 23, 42, 0.06);
-    border-color: #94a3b8;
-    transform: translateY(-1px);
-    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+.tool-rail-btn:not(:disabled):hover {
+    background: rgba(var(--tool-accent), 0.12);
+    border-color: rgba(var(--tool-accent), 0.34);
+    transform: translateY(-2px);
+    box-shadow: 0 9px 18px rgba(var(--tool-accent), 0.14);
 }
+
+.tool-rail-btn:focus-visible {
+    outline: 3px solid rgba(var(--tool-accent), 0.22);
+    outline-offset: 2px;
+}
+
+.tool-rail-btn:disabled {
+    color: var(--text-muted);
+    background: transparent;
+    border-color: var(--border);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.38;
+    transform: none;
+}
+
+.tool-rail-btn.is-active {
+    color: #fff;
+    background: rgb(var(--tool-accent));
+    border-color: rgb(var(--tool-accent));
+    box-shadow: 0 8px 18px rgba(var(--tool-accent), 0.25);
+}
+
+.tool-rail-btn--open { --tool-accent: 79, 70, 229; }
+.tool-rail-btn--word { --tool-accent: 24, 90, 189; }
+.tool-rail-btn--comments { --tool-accent: 13, 148, 136; }
+.tool-rail-btn--theme { --tool-accent: 124, 58, 237; }
 
 .tool-rail-icon {
-    width: 22px;
-    height: 22px;
+    width: 23px;
+    height: 23px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,9 +120,26 @@ body {
     height: 100%;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.8;
+    stroke-width: 1.7;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+.tool-rail-icon .icon-fill {
+    fill: currentColor;
+    stroke: none;
+    opacity: 0.13;
+}
+
+.tool-rail-icon .icon-solid {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.tool-rail-icon .icon-contrast {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.35;
 }
 
 .app-shell {
@@ -777,9 +822,9 @@ body.drag-over::after {
 
 :is(html, body).dark-theme .page { box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
 :is(html, body).dark-theme .doc-table td { border-color: #555; }
-:is(html, body).dark-theme .tool-rail-btn:hover {
-    background: rgba(255,255,255,0.06);
-    border-color: #64748b;
+:is(html, body).dark-theme .tool-rail-btn:not(:disabled):hover {
+    background: rgba(var(--tool-accent), 0.2);
+    border-color: rgba(var(--tool-accent), 0.5);
     box-shadow: 0 10px 18px rgba(0,0,0,0.22);
 }
 :is(html, body).dark-theme .status-banner {

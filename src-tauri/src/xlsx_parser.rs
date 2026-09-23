@@ -1798,7 +1798,7 @@ mod tests {
 
     fn write_test_xlsx(files: &[(&str, &str)]) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "lyte-xlsx-parser-test-{}-{}.xlsx",
+            "papyr-xlsx-parser-test-{}-{}.xlsx",
             std::process::id(),
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)

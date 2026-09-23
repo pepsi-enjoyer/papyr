@@ -1,5 +1,5 @@
 [package]
-name = "lyte"
+name = "papyr"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,7 @@ name = "main"
 path = "src-rust/main.rs"
 
 [lib]
-name = "lyte"
+name = "papyr"
 path = "src-rust/lib.rs"
 
 [dependencies]

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0",
-  "productName": "Lyte",
+  "productName": "Papyr",
   "version": "0.0.1",
-  "identifier": "com.pepsienjoyer.lyte",
+  "identifier": "com.pepsienjoyer.papyr",
   "build": {
     "frontendDist": "../src",
     "beforeDevCommand": "",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Lyte",
+        "title": "Papyr",
         "width": 1200,
         "height": 800,
         "minWidth": 800,
@@ -44,42 +44,42 @@
     "fileAssociations": [
       {
         "ext": ["docx"],
-        "name": "Lyte Word Document",
+        "name": "Papyr Word Document",
         "description": "Microsoft Word document",
         "role": "Viewer",
         "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       },
       {
         "ext": ["xlsx"],
-        "name": "Lyte Excel Workbook",
+        "name": "Papyr Excel Workbook",
         "description": "Microsoft Excel workbook",
         "role": "Viewer",
         "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       },
       {
         "ext": ["xlsm"],
-        "name": "Lyte Excel Macro-Enabled Workbook",
+        "name": "Papyr Excel Macro-Enabled Workbook",
         "description": "Microsoft Excel macro-enabled workbook",
         "role": "Viewer",
         "mimeType": "application/vnd.ms-excel.sheet.macroEnabled.12"
       },
       {
         "ext": ["xlsb"],
-        "name": "Lyte Excel Binary Workbook",
+        "name": "Papyr Excel Binary Workbook",
         "description": "Microsoft Excel binary workbook",
         "role": "Viewer",
         "mimeType": "application/vnd.ms-excel.sheet.binary.macroEnabled.12"
       },
       {
         "ext": ["xls"],
-        "name": "Lyte Excel 97-2003 Workbook",
+        "name": "Papyr Excel 97-2003 Workbook",
         "description": "Microsoft Excel 97-2003 workbook",
         "role": "Viewer",
         "mimeType": "application/vnd.ms-excel"
       },
       {
         "ext": ["csv"],
-        "name": "Lyte CSV File",
+        "name": "Papyr CSV File",
         "description": "Comma-separated values file",
         "role": "Viewer",
         "mimeType": "text/csv"

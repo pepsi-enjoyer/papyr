@@ -1,8 +1,8 @@
-use lyte::DocxParser;
+use papyr::DocxParser;
 use std::io::Cursor;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Lyte DOCX Comment Parser Demo");
+    println!("Papyr DOCX Comment Parser Demo");
     
     // Example comments.xml content for demonstration
     let comments_xml = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

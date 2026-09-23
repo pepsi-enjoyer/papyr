@@ -1,10 +1,10 @@
-# Lyte - Specification
+# Papyr - Specification
 
 > A lightweight, Rust-powered DOCX and XLSX viewer. Messenger of the gods -- delivers the document to you, fast and light.
 
 ## 1. Overview
 
-Lyte is a read-only DOCX and XLSX viewer built with Rust and Tauri 2.0. It replaces the need to open Microsoft Word or Excel when you just want to read a document or quickly inspect a workbook. The app is fast, minimal, and cross-platform (Windows, macOS, Linux).
+Papyr is a read-only DOCX and XLSX viewer built with Rust and Tauri 2.0. It replaces the need to open Microsoft Word or Excel when you just want to read a document or quickly inspect a workbook. The app is fast, minimal, and cross-platform (Windows, macOS, Linux).
 
 ### Goals
 
